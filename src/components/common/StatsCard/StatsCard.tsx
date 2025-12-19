@@ -1,5 +1,5 @@
 import React from 'react';
-import { List, Clock, CheckCircle2 } from 'lucide-react-native';
+import { List, Clock, CheckCircle2, AlertCircle } from 'lucide-react-native';
 import { Box, Text } from '../../../elements';
 import { useThemeContext } from '../../../context/ThemeContext';
 
@@ -21,7 +21,9 @@ const StatsCard: React.FC<StatsCardProps> = ({ stats }) => {
       case 'total':
         return <List size={18} color={colors.primary} />;
       case 'pending':
-        return <Clock size={18} color={colors.danger} />;
+        return <Clock size={18} color={colors.primary} />;
+      case 'overdue':
+        return <AlertCircle size={18} color={colors.danger} />;
       case 'completed':
         return <CheckCircle2 size={18} color={colors.success} />;
       default:

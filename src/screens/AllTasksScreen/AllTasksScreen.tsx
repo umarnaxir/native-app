@@ -8,7 +8,7 @@ import { STRINGS } from '../../utils/constants';
 
 const AllTasksScreen: React.FC = () => {
   const { colors } = useThemeContext();
-  const { tasks, updateTask, deleteTask, toggleTaskCompleted } = useTasks();
+  const { tasks, updateTask, deleteTask, toggleTaskCompleted, toggleTaskPinned } = useTasks();
 
   const ListHeaderComponent = () => (
     <ScreenHeader
@@ -24,7 +24,11 @@ const AllTasksScreen: React.FC = () => {
         onToggleCompleted={toggleTaskCompleted}
         onUpdate={updateTask}
         onDelete={deleteTask}
+        onTogglePinned={toggleTaskPinned}
         ListHeaderComponent={ListHeaderComponent}
+        onRefresh={async () => {
+          // Refresh logic - tasks are already reactive
+        }}
       />
     </Box>
   );
