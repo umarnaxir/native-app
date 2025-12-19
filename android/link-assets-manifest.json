@@ -1,0 +1,13 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "src/assets/fonts/Delius-Regular.ttf",
+      "sha1": "49ee4a09aa824e4b36701b7ca2edde5fe8364750"
+    },
+    {
+      "path": "src/assets/fonts/MeowScript-Regular.ttf",
+      "sha1": "6320e3ee283d39a2de4f87ba9ebeee640f53c87a"
+    }
+  ]
+}

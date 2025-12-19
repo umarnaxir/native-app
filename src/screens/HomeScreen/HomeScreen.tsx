@@ -1,5 +1,5 @@
 import React, { useMemo, useRef, useEffect } from 'react';
-import { KeyboardAvoidingView, Platform, Animated } from 'react-native';
+import { KeyboardAvoidingView, Platform, Animated, StyleSheet } from 'react-native';
 import { Plus } from 'lucide-react-native';
 import { useThemeContext } from '../../context/ThemeContext';
 import { useTasks } from '../../navigation/TabNavigator';
@@ -8,6 +8,7 @@ import { Box, Text, Input, Button } from '../../elements';
 import TaskList from '../../components/tasks/TaskList';
 import StatsCard from '../../components/common/StatsCard';
 import { STRINGS } from '../../utils/constants';
+import { fonts } from '../../utils/fonts';
 
 const CONTAINER_PADDING = 16; // Consistent padding for all elements
 
@@ -50,16 +51,18 @@ const HomeHeader: React.FC<HomeHeaderProps> = React.memo(
         <Box paddingTop={50} paddingBottom={20}>
           {/* Header Section */}
           <Box marginBottom={20}>
-            <Text fontSize={24} fontWeight="700" color="text" marginBottom={6}>
+            {/* <Text fontSize={24} fontWeight="700" fontFamily="meowScript" color="text" marginBottom={6}>
               {STRINGS.homeGreeting}
-            </Text>
-            <Text fontSize={14} color="mutedText" lineHeight={20}>
+            </Text> */}
+
+            <Text style={styles.testfont}>Hey! Umar</Text>
+            <Text fontSize={14} fontFamily="regular" color="mutedText" lineHeight={20}>
               Stay on top of your day with a focused task list.
             </Text>
           </Box>
 
           {/* Stats Cards Section */}
-          <Box marginBottom={20}>
+          <Box marginBottom={10}>
             <StatsCard stats={stats} />
           </Box>
 
@@ -69,8 +72,8 @@ const HomeHeader: React.FC<HomeHeaderProps> = React.memo(
             borderColor="border"
             borderWidth={1}
             borderRadius={12}
-            padding={14}
-            marginBottom={20}
+            padding={10}
+            marginBottom={10}
           >
             <Text fontSize={14} fontWeight="600" color="text" marginBottom={10}>
               Create New Task
@@ -82,7 +85,7 @@ const HomeHeader: React.FC<HomeHeaderProps> = React.memo(
               returnKeyType="done"
               onSubmitEditing={handleSubmit}
               size="medium"
-              style={{ marginBottom: 10 }}
+              // style={{ marginBottom: 10}}
             />
             <Button
               title={STRINGS.addTaskButton}
@@ -97,10 +100,10 @@ const HomeHeader: React.FC<HomeHeaderProps> = React.memo(
 
           {/* Tasks Section Header */}
           <Box marginBottom={12}>
-            <Text fontSize={16} fontWeight="600" color="text">
+            <Text fontSize={16} fontWeight="600"  color="text">
               Your Tasks
             </Text>
-            <Text fontSize={12} color="mutedText" marginTop={3}>
+            <Text fontSize={12} fontFamily="regular" color="mutedText" marginTop={3}>
               {stats[0].value} {stats[0].value === 1 ? 'task' : 'tasks'} total
             </Text>
           </Box>
@@ -114,20 +117,22 @@ HomeHeader.displayName = 'HomeHeader';
 
 const HomeScreen: React.FC = () => {
   const { colors } = useThemeContext();
-  const { tasks, addTask, updateTask, deleteTask, toggleTaskCompleted } = useTasks();
+  const { tasks, addTask, updateTask, deleteTask, toggleTaskCompleted, toggleTaskPinned } = useTasks();
   const { title, setTitle, isSubmitting, handleSubmit } = useTaskForm(addTask);
 
   const totalTasks = tasks.length;
   const completedTasks = tasks.filter((task) => task.completed).length;
-  const pendingTasks = totalTasks - completedTasks;
+  const pendingTasks = tasks.filter((task) => task.status === 'pending').length;
+  const overdueTasks = tasks.filter((task) => task.status === 'overdue').length;
 
   const stats = useMemo(
     () => [
       { label: 'Total', value: totalTasks, valueColor: 'text' as const },
-      { label: 'Pending', value: pendingTasks, valueColor: 'danger' as const },
+      { label: 'Pending', value: pendingTasks, valueColor: 'text' as const },
+      { label: 'Overdue', value: overdueTasks, valueColor: 'danger' as const },
       { label: 'Completed', value: completedTasks, valueColor: 'success' as const },
     ],
-    [totalTasks, pendingTasks, completedTasks]
+    [totalTasks, pendingTasks, overdueTasks, completedTasks]
   );
 
   const ListHeaderComponent = useMemo(
@@ -154,8 +159,12 @@ const HomeScreen: React.FC = () => {
         onToggleCompleted={toggleTaskCompleted}
         onUpdate={updateTask}
         onDelete={deleteTask}
+        onTogglePinned={toggleTaskPinned}
         ListHeaderComponent={ListHeaderComponent}
         containerPadding={CONTAINER_PADDING}
+        onRefresh={async () => {
+          // Refresh logic - tasks are already reactive
+        }}
       />
     </KeyboardAvoidingView>
   );
@@ -163,3 +172,14 @@ const HomeScreen: React.FC = () => {
 
 export default HomeScreen;
 
+
+
+const styles  = StyleSheet.create({
+  testfont:{
+    fontFamily:fonts.meowScript,
+    fontSize:24,
+    fontWeight:"700",
+    color:"text",
+    marginBottom:6,
+  }
+})

@@ -1,11 +1,16 @@
 import React from 'react';
-import { Text as RNText, TextProps, TextStyle } from 'react-native';
+import { Text as RNText, TextProps, TextStyle, DimensionValue } from 'react-native';
 import { useThemeContext } from '../context/ThemeContext';
+import { fonts, FontWeight } from '../utils/fonts';
+
+// Valid font weights that can be used as React Native fontWeight (excludes custom fonts like meowScript)
+type ValidFontWeight = 'normal' | 'bold' | '100' | '200' | '300' | '400' | '500' | '600' | '700' | '800' | '900' | 'regular' | 'medium';
 
 export type TextElementProps = TextProps & {
   color?: keyof ReturnType<typeof useThemeContext>['colors'];
   fontSize?: number;
-  fontWeight?: 'normal' | 'bold' | '100' | '200' | '300' | '400' | '500' | '600' | '700' | '800' | '900';
+  fontWeight?: ValidFontWeight;
+  fontFamily?: FontWeight;
   textAlign?: 'auto' | 'left' | 'right' | 'center' | 'justify';
   textDecorationLine?: 'none' | 'underline' | 'line-through' | 'underline line-through';
   margin?: number | string;
@@ -22,6 +27,7 @@ const Text: React.FC<TextElementProps> = ({
   color = 'text',
   fontSize,
   fontWeight,
+  fontFamily,
   textAlign,
   textDecorationLine,
   margin,
@@ -37,18 +43,30 @@ const Text: React.FC<TextElementProps> = ({
 }) => {
   const { colors } = useThemeContext();
 
+  let fontFamilyValue: string | undefined;
+  if (fontFamily) {
+    fontFamilyValue = fonts[fontFamily];
+  } else if (fontWeight && (fontWeight === 'regular' || fontWeight === 'medium' || fontWeight === 'bold')) {
+    fontFamilyValue = fonts[fontWeight];
+  }
+
+  const fontWeightValue = fontWeight && !['regular', 'medium', 'bold'].includes(fontWeight) 
+    ? (fontFamilyValue ? undefined : fontWeight)
+    : undefined;
+
   const computedStyle: TextStyle = {
     color: colors[color],
     ...(fontSize !== undefined && { fontSize }),
-    ...(fontWeight && { fontWeight }),
+    ...(fontFamilyValue && { fontFamily: fontFamilyValue }),
+    ...(fontWeightValue && { fontWeight: fontWeightValue }),
     ...(textAlign && { textAlign }),
     ...(textDecorationLine && { textDecorationLine }),
-    ...(margin !== undefined && { margin: typeof margin === 'string' ? margin : margin }),
-    ...(marginTop !== undefined && { marginTop: typeof marginTop === 'string' ? marginTop : marginTop }),
-    ...(marginBottom !== undefined && { marginBottom: typeof marginBottom === 'string' ? marginBottom : marginBottom }),
-    ...(marginLeft !== undefined && { marginLeft: typeof marginLeft === 'string' ? marginLeft : marginLeft }),
-    ...(marginRight !== undefined && { marginRight: typeof marginRight === 'string' ? marginRight : marginRight }),
-    ...(padding !== undefined && { padding: typeof padding === 'string' ? padding : padding }),
+    ...(margin !== undefined && { margin: margin as DimensionValue }),
+    ...(marginTop !== undefined && { marginTop: marginTop as DimensionValue }),
+    ...(marginBottom !== undefined && { marginBottom: marginBottom as DimensionValue }),
+    ...(marginLeft !== undefined && { marginLeft: marginLeft as DimensionValue }),
+    ...(marginRight !== undefined && { marginRight: marginRight as DimensionValue }),
+    ...(padding !== undefined && { padding: padding as DimensionValue }),
     ...(opacity !== undefined && { opacity }),
     ...(lineHeight !== undefined && { lineHeight }),
   };
