@@ -19,6 +19,7 @@ export type RootTabParamList = {
   AllTasks: undefined;
   PendingTasks: undefined;
   Settings: undefined;
+  Rumie: undefined;
 };
 
 export type SettingsStackParamList = {

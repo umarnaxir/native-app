@@ -1,13 +1,32 @@
-import React, { createContext, ReactNode, useContext, useEffect, useMemo, useState } from 'react';
+import React, {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { Home, List, Clock, Settings as SettingsIcon } from 'lucide-react-native';
-import { RootTabParamList, SettingsStackParamList, Task, TaskPriority } from '../types';
+import {
+  Home,
+  List,
+  Clock,
+  Settings as SettingsIcon,
+  School,
+} from 'lucide-react-native';
+import {
+  RootTabParamList,
+  SettingsStackParamList,
+  Task,
+  TaskPriority,
+} from '../types';
 import HomeScreen from '../screens/HomeScreen';
 import AllTasksScreen from '../screens/AllTasksScreen';
 import PendingTasksScreen from '../screens/PendingTasksScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import TaskHistoryScreen from '../screens/TaskHistoryScreen';
+import RumieScreen from '../screens/RumieScreen';
 import { useThemeContext } from '../context/ThemeContext';
 import { HistoryProvider } from '../context/HistoryContext';
 import { getStorageItem, setStorageItem } from '../storage/asyncStorage';
@@ -16,8 +35,18 @@ import { calculateTaskStatus } from '../utils/taskHistory';
 
 type TasksContextValue = {
   tasks: Task[];
-  addTask: (title: string, dueDate?: number, priority?: TaskPriority, pinned?: boolean) => void;
-  updateTask: (id: string, title: string, dueDate?: number, priority?: TaskPriority) => void;
+  addTask: (
+    title: string,
+    dueDate?: number,
+    priority?: TaskPriority,
+    pinned?: boolean,
+  ) => void;
+  updateTask: (
+    id: string,
+    title: string,
+    dueDate?: number,
+    priority?: TaskPriority,
+  ) => void;
   deleteTask: (id: string) => void;
   toggleTaskCompleted: (id: string) => void;
   toggleTaskPinned: (id: string) => void;
@@ -52,15 +81,15 @@ const SettingsNavigator: React.FC = () => {
         },
       }}
     >
-      <SettingsStack.Screen 
-        name="SettingsMain" 
+      <SettingsStack.Screen
+        name="SettingsMain"
         component={SettingsScreen}
         options={{ headerShown: false }}
       />
-      <SettingsStack.Screen 
-        name="TaskHistory" 
+      <SettingsStack.Screen
+        name="TaskHistory"
         component={TaskHistoryScreen}
-        options={{ 
+        options={{
           title: 'Task History',
           headerBackTitle: 'Settings',
         }}
@@ -77,7 +106,13 @@ type TasksProviderProps = {
 const migrateTask = (task: any): Task => {
   const status = calculateTaskStatus({
     ...task,
-    status: task.status || (task.completed ? 'completed' : task.dueDate && task.dueDate < Date.now() ? 'overdue' : 'pending'),
+    status:
+      task.status ||
+      (task.completed
+        ? 'completed'
+        : task.dueDate && task.dueDate < Date.now()
+        ? 'overdue'
+        : 'pending'),
   });
   return {
     id: task.id,
@@ -127,14 +162,19 @@ const TasksProvider: React.FC<TasksProviderProps> = ({ children }) => {
             return { ...task, status: newStatus };
           }
           return task;
-        })
+        }),
       );
     }, 60000); // Check every minute
 
     return () => clearInterval(interval);
   }, [isHydrated]);
 
-  const addTask = (title: string, dueDate?: number, priority?: TaskPriority, pinned?: boolean) => {
+  const addTask = (
+    title: string,
+    dueDate?: number,
+    priority?: TaskPriority,
+    pinned?: boolean,
+  ) => {
     const trimmed = title.trim();
     if (!trimmed) {
       return;
@@ -160,7 +200,12 @@ const TasksProvider: React.FC<TasksProviderProps> = ({ children }) => {
     });
   };
 
-  const updateTask = (id: string, title: string, dueDate?: number, priority?: TaskPriority) => {
+  const updateTask = (
+    id: string,
+    title: string,
+    dueDate?: number,
+    priority?: TaskPriority,
+  ) => {
     const trimmed = title.trim();
     if (!trimmed) {
       return;
@@ -180,7 +225,7 @@ const TasksProvider: React.FC<TasksProviderProps> = ({ children }) => {
           };
         }
         return task;
-      })
+      }),
     );
   };
 
@@ -197,19 +242,21 @@ const TasksProvider: React.FC<TasksProviderProps> = ({ children }) => {
             ...task,
             completed: newCompleted,
             completedAt: newCompleted ? Date.now() : undefined,
-            status: newCompleted ? 'completed' : calculateTaskStatus({ ...task, completed: false }),
+            status: newCompleted
+              ? 'completed'
+              : calculateTaskStatus({ ...task, completed: false }),
           };
           return updatedTask;
         }
         return task;
-      })
+      }),
     );
   };
 
   const toggleTaskPinned = (id: string) => {
     setTasks(prev => {
       const updated = prev.map(task =>
-        task.id === id ? { ...task, pinned: !task.pinned } : task
+        task.id === id ? { ...task, pinned: !task.pinned } : task,
       );
       // Sort: pinned first, then by creation date (newest first)
       return updated.sort((a, b) => {
@@ -222,9 +269,7 @@ const TasksProvider: React.FC<TasksProviderProps> = ({ children }) => {
 
   const updateTaskPriority = (id: string, priority: TaskPriority) => {
     setTasks(prev =>
-      prev.map(task =>
-        task.id === id ? { ...task, priority } : task
-      )
+      prev.map(task => (task.id === id ? { ...task, priority } : task)),
     );
   };
 
@@ -247,14 +292,24 @@ const TasksProvider: React.FC<TasksProviderProps> = ({ children }) => {
       toggleTaskPinned,
       updateTaskPriority,
     }),
-    [sortedTasks, addTask, updateTask, deleteTask, toggleTaskCompleted, toggleTaskPinned, updateTaskPriority],
+    [
+      sortedTasks,
+      addTask,
+      updateTask,
+      deleteTask,
+      toggleTaskCompleted,
+      toggleTaskPinned,
+      updateTaskPriority,
+    ],
   );
 
   if (!isHydrated) {
     return null;
   }
 
-  return <TasksContext.Provider value={value}>{children}</TasksContext.Provider>;
+  return (
+    <TasksContext.Provider value={value}>{children}</TasksContext.Provider>
+  );
 };
 
 const TabNavigator: React.FC = () => {
@@ -278,7 +333,9 @@ const TabNavigator: React.FC = () => {
             name="Home"
             component={HomeScreen}
             options={{
-              tabBarIcon: ({ color, size }) => <Home color={color} size={size} />,
+              tabBarIcon: ({ color, size }) => (
+                <Home color={color} size={size} />
+              ),
             }}
           />
           <Tab.Screen
@@ -286,7 +343,9 @@ const TabNavigator: React.FC = () => {
             component={AllTasksScreen}
             options={{
               title: 'All Tasks',
-              tabBarIcon: ({ color, size }) => <List color={color} size={size} />,
+              tabBarIcon: ({ color, size }) => (
+                <List color={color} size={size} />
+              ),
             }}
           />
           <Tab.Screen
@@ -294,14 +353,27 @@ const TabNavigator: React.FC = () => {
             component={PendingTasksScreen}
             options={{
               title: 'Pending',
-              tabBarIcon: ({ color, size }) => <Clock color={color} size={size} />,
+              tabBarIcon: ({ color, size }) => (
+                <Clock color={color} size={size} />
+              ),
+            }}
+          />
+          <Tab.Screen
+            name="Rumie"
+            component={RumieScreen}
+            options={{
+              tabBarIcon: ({ color, size }) => (
+                <School color={color} size={size} />
+              ),
             }}
           />
           <Tab.Screen
             name="Settings"
             component={SettingsNavigator}
             options={{
-              tabBarIcon: ({ color, size }) => <SettingsIcon color={color} size={size} />,
+              tabBarIcon: ({ color, size }) => (
+                <SettingsIcon color={color} size={size} />
+              ),
             }}
           />
         </Tab.Navigator>
@@ -311,5 +383,3 @@ const TabNavigator: React.FC = () => {
 };
 
 export default TabNavigator;
-
-
