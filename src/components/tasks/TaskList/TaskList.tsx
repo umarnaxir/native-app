@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { FlatList, ListRenderItem, RefreshControl } from 'react-native';
+import React, { useState, useMemo } from 'react';
+import { FlatList, ListRenderItem, RefreshControl, ViewStyle } from 'react-native';
 import { Task } from '../../../types';
 import TaskItem from '../TaskItem';
 import { Box, Text } from '../../../elements';
@@ -41,6 +41,15 @@ const TaskList: React.FC<TaskListProps> = ({
     }
   };
 
+  const contentContainerStyle = useMemo<ViewStyle>(
+    () => ({
+      paddingHorizontal: containerPadding,
+      paddingVertical: 0,
+      paddingBottom: 32,
+    }),
+    [containerPadding]
+  );
+
   const renderItem: ListRenderItem<Task> = ({ item }) => {
     return (
       <TaskItem
@@ -77,11 +86,7 @@ const TaskList: React.FC<TaskListProps> = ({
       keyExtractor={(item) => item.id}
       renderItem={renderItem}
       ListHeaderComponent={ListHeaderComponent}
-      contentContainerStyle={{ 
-        paddingHorizontal: containerPadding, 
-        paddingVertical: 0, 
-        paddingBottom: 32 
-      }}
+      contentContainerStyle={contentContainerStyle}
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
       refreshControl={
