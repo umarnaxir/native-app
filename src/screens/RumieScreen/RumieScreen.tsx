@@ -1,21 +1,38 @@
 import React from 'react';
-import { View, Text, FlatList, Image, ActivityIndicator, StyleSheet, Pressable, Alert } from 'react-native';
+import { View, Text, FlatList, Image, ActivityIndicator, StyleSheet, Pressable, Alert, Button } from 'react-native';
 import { useFetchLoggedInUser, useFetchHomepageMarketplaceListingV2 } from '../../hooks';
 import { IMAGE_BASE_URL } from '../../utils/constants';
 import { useThemeContext } from '../../context/ThemeContext';
 
 const RumieScreen = () => {
-  const { user, loading: userLoading } = useFetchLoggedInUser();
+  const { user, loading: userLoading, error: userError, refetch: refetchUser } = useFetchLoggedInUser();
   const eduInstituteId = user?.eduInstituteId ?? null;
-  const { listings, loading: listingsLoading } = useFetchHomepageMarketplaceListingV2(eduInstituteId);
+  const { listings, loading: listingsLoading, error: listingsError, refetch: refetchListings } = useFetchHomepageMarketplaceListingV2(eduInstituteId);
 
-  const loading = userLoading || listingsLoading;
   const { colors } = useThemeContext();
+  
+  const initialLoading = userLoading || (listingsLoading && listings.length === 0);
 
-  if (loading) {
+  if (initialLoading) {
     return (
       <View style={styles.center}>
         <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
+  if (userError || listingsError) {
+    const message = userError?.message ?? listingsError?.message ?? 'Something went wrong';
+    return (
+      <View style={[styles.center, styles.errorContainer, { backgroundColor: colors.background }] }>
+        <Text style={[styles.errorText, { color: colors.text }]}>Error: {message}</Text>
+        <Button
+          title="Retry"
+          onPress={() => {
+            refetchUser().catch((e) => console.warn('refetchUser failed', e));
+            refetchListings().catch((e) => console.warn('refetchListings failed', e));
+          }}
+        />
       </View>
     );
   }
@@ -67,11 +84,15 @@ const styles = StyleSheet.create({
   header: { fontSize: 18, fontWeight: '600', marginBottom: 12 , textAlign: 'center' },
   sectionHeader: { fontSize: 20, fontWeight: '700', marginBottom: 12, marginTop: 6 },
   item: { flexDirection: 'column', marginBottom: 16, alignItems: 'center', padding: 12, borderRadius: 10 },
+  itemPressed: { backgroundColor: '#f0f0f0' },
   thumb: { width: 370, height: 370, borderRadius: 8, marginBottom: 10, backgroundColor: '#eee' },
   meta: { width: '100%', alignItems: 'center', justifyContent: 'center' },
   title: { fontSize: 18, fontWeight: '600', textAlign: 'center' },
   price: { marginTop: 6, fontSize: 16 },
   empty: { textAlign: 'center', marginTop: 24 },
+  footer: { paddingVertical: 20 },
+  errorContainer: { padding: 16 },
+  errorText: { textAlign: 'center', marginBottom: 12 },
 });
 
 type EmptyListProps = { color?: string };

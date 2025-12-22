@@ -32,8 +32,10 @@ export const useFetchHomepageMarketplaceListingV2 = (eduInstituteId?: string | n
     fetchPolicy: 'network-only',
   });
 
+  const listings = data?.fetchHomepageMarketplaceListingV2 ?? [];
+
   return {
-    listings: data?.fetchHomepageMarketplaceListingV2 ?? [],
+    listings,
     loading,
     error,
     refetch,
