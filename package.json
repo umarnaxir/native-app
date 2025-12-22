@@ -1,5 +1,5 @@
 {
-  "name": "newTodoApp",
+  "name": "new-todo-app",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -24,7 +24,8 @@
     "react-native-safe-area-context": "^5.5.2",
     "react-native-screens": "^4.19.0",
     "react-native-svg": "^15.15.1",
-    "react-native-ui-datepicker": "^3.1.2"
+    "react-native-ui-datepicker": "^3.1.2",
+    "rxjs": "^7.8.2"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

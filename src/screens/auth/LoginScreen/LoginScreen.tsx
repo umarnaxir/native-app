@@ -5,14 +5,16 @@ import { Box, Text, Input, Button, Logo } from '../../../elements';
 import { useThemeContext } from '../../../context/ThemeContext';
 import { useAuth } from '../../../context/AuthContext';
 import { STRINGS } from '../../../utils/constants';
+import { useLoginMutation } from '../../../hooks/mutations/useLogin';
+import { Platform as GqlPlatform } from '../../../graphql/generated/types';
 
 const LoginScreen: React.FC = () => {
   const { colors } = useThemeContext();
-  const { login } = useAuth();
+  const { setAuthState } = useAuth();
+  const { mutate, loading: isSubmitting, error: loginError } = useLoginMutation();
   const [username, setUsername] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [error, setError] = useState<string>('');
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [fadeAnim] = useState(new Animated.Value(0));
   const [usernameFocused, setUsernameFocused] = useState<boolean>(false);
@@ -26,14 +28,37 @@ const LoginScreen: React.FC = () => {
     }).start();
   }, [fadeAnim]);
 
+  useEffect(() => {
+    if (loginError) {
+      setError(loginError.message);
+    }
+  }, [loginError]);
+
   const handleLogin = async () => {
     setError('');
-    setIsSubmitting(true);
-    const success = await login(username, password);
-    if (!success) {
-      setError('Invalid credentials. Please try again.');
+    try {
+      const gqlPlatform = Platform.OS === 'ios' ? GqlPlatform.Ios : Platform.OS === 'android' ? GqlPlatform.Android : GqlPlatform.Web;
+
+      const result = await mutate({
+        variables: {
+          data: {
+            email: username,
+            password,
+            platform: gqlPlatform,
+            deviceModel: `${Platform.OS} ${Platform.Version ?? ''}`,
+            deviceToken: '',
+          },
+        },
+      });
+
+      if (result.data?.login.accessToken) {
+        await setAuthState(result.data.login);
+      } else {
+        setError(result.data?.login.msg ?? 'Invalid credentials. Please try again.');
+      }
+    } catch (e: any) {
+      setError(e.message ?? 'An unexpected error occurred.');
     }
-    setIsSubmitting(false);
   };
 
   const togglePasswordVisibility = () => {

@@ -1,5 +1,7 @@
 export const STORAGE_KEYS = {
   IS_LOGGED_IN: 'isLoggedIn',
+  ACCESS_TOKEN: 'accessToken',
+  REFRESH_TOKEN: 'refreshToken',
   IS_DARK_MODE: 'isDarkMode',
   TASKS: 'tasks',
 } as const;

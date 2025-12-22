@@ -1,11 +1,15 @@
 import React, { createContext, useCallback, useContext, useEffect, useState, ReactNode } from 'react';
-import { STORAGE_KEYS, AUTH_CREDENTIALS } from '../utils/constants';
+import { STORAGE_KEYS } from '../utils/constants';
 import { getStorageItem, removeStorageItem, setStorageItem } from '../storage/asyncStorage';
+import { useLoginMutation } from '../hooks/mutations/useLogin';
+import apolloClient from '../apollo/client';
+import { LoginResponse } from '../graphql/generated/types';
 
 type AuthContextValue = {
   isLoggedIn: boolean;
   isAuthLoading: boolean;
-  login: (username: string, password: string) => Promise<boolean>;
+  loginWithCredentials: (username: string, password: string) => Promise<boolean>;
+  setAuthState: (loginData: LoginResponse) => Promise<void>;
   logout: () => Promise<void>;
 };
 
@@ -18,11 +22,13 @@ type AuthProviderProps = {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [isAuthLoading, setIsAuthLoading] = useState<boolean>(true);
+  const { mutate } = useLoginMutation();
 
   useEffect(() => {
     const hydrateAuth = async () => {
-      const stored = await getStorageItem<boolean>(STORAGE_KEYS.IS_LOGGED_IN);
-      if (stored) {
+      // Check for an access token first
+      const token = await getStorageItem<string>(STORAGE_KEYS.ACCESS_TOKEN);
+      if (token) {
         setIsLoggedIn(true);
       }
       setIsAuthLoading(false);
@@ -31,18 +37,53 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     hydrateAuth();
   }, []);
 
-  const login = useCallback(async (username: string, password: string): Promise<boolean> => {
-    if (username === AUTH_CREDENTIALS.username && password === AUTH_CREDENTIALS.password) {
-      setIsLoggedIn(true);
+  const setAuthState = useCallback(async (loginData: LoginResponse) => {
+    if (loginData && loginData.accessToken) {
+      await setStorageItem(STORAGE_KEYS.ACCESS_TOKEN, loginData.accessToken);
+      if (loginData.refreshToken) {
+        await setStorageItem(STORAGE_KEYS.REFRESH_TOKEN, loginData.refreshToken);
+      }
       await setStorageItem(STORAGE_KEYS.IS_LOGGED_IN, true);
-      return true;
+      setIsLoggedIn(true);
+
+      // Optionally clear and refetch store to ensure auth-aware requests use the new token
+      try {
+        await apolloClient.clearStore();
+      } catch (e) {
+        // ignore
+      }
     }
-    return false;
   }, []);
+
+  const loginWithCredentials = useCallback(
+    async (username: string, password: string): Promise<boolean> => {
+      try {
+        const res = await mutate({ variables: { data: { username, password } } });
+        const loginData = res?.data?.login;
+        if (loginData) {
+          await setAuthState(loginData);
+          return true;
+        }
+        return false;
+      } catch (error) {
+        console.warn('Login error', error);
+        return false;
+      }
+    },
+    [mutate, setAuthState]
+  );
 
   const logout = useCallback(async () => {
     setIsLoggedIn(false);
+    await removeStorageItem(STORAGE_KEYS.ACCESS_TOKEN);
+    await removeStorageItem(STORAGE_KEYS.REFRESH_TOKEN);
     await removeStorageItem(STORAGE_KEYS.IS_LOGGED_IN);
+
+    try {
+      await apolloClient.clearStore();
+    } catch (e) {
+      // ignore
+    }
   }, []);
 
   return (
@@ -50,7 +91,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       value={{
         isLoggedIn,
         isAuthLoading,
-        login,
+        loginWithCredentials,
+        setAuthState,
         logout,
       }}
     >
