@@ -27,4 +27,7 @@ export const STRINGS = {
   settingsTitle: 'Settings',
 } as const;
 
+// Base URL for images. Falls back to the value in .env or the known S3 bucket.
+export const IMAGE_BASE_URL = process.env.IMAGE_BASE_URL ?? 'https://rumie-files.s3.us-east-2.amazonaws.com/original/';
+
 
