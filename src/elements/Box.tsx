@@ -21,8 +21,11 @@ export type BoxProps = ViewProps & {
   marginRight?: number | string;
   borderRadius?: number;
   borderWidth?: number;
+  borderTopWidth?: number;
+  borderTopColor?: keyof ReturnType<typeof useThemeContext>['colors'] | string;
   flex?: number;
   flexDirection?: 'row' | 'column' | 'row-reverse' | 'column-reverse';
+  flexWrap?: 'wrap' | 'nowrap' | 'wrap-reverse';
   alignItems?: 'flex-start' | 'flex-end' | 'center' | 'stretch' | 'baseline';
   justifyContent?: 'flex-start' | 'flex-end' | 'center' | 'space-between' | 'space-around' | 'space-evenly';
   gap?: number;
@@ -50,8 +53,11 @@ const Box: React.FC<BoxProps> = ({
   marginRight,
   borderRadius,
   borderWidth,
+  borderTopWidth,
+  borderTopColor,
   flex,
   flexDirection,
+  flexWrap,
   alignItems,
   justifyContent,
   gap,
@@ -82,8 +88,16 @@ const Box: React.FC<BoxProps> = ({
     ...(marginRight !== undefined && { marginRight: typeof marginRight === 'string' ? marginRight : marginRight }),
     ...(borderRadius !== undefined && { borderRadius }),
     ...(borderWidth !== undefined && { borderWidth }),
+    ...(borderTopWidth !== undefined && { borderTopWidth }),
+    ...(borderTopColor && {
+      borderTopColor:
+        typeof borderTopColor === 'string' && borderTopColor in colors
+          ? colors[borderTopColor as keyof typeof colors]
+          : borderTopColor,
+    }),
     ...(flex !== undefined && { flex }),
     ...(flexDirection && { flexDirection }),
+    ...(flexWrap && { flexWrap }),
     ...(alignItems && { alignItems }),
     ...(justifyContent && { justifyContent }),
     ...(gap !== undefined && { gap }),
