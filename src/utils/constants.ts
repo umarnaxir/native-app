@@ -4,6 +4,7 @@ export const STORAGE_KEYS = {
   REFRESH_TOKEN: 'refreshToken',
   IS_DARK_MODE: 'isDarkMode',
   TASKS: 'tasks',
+  ACCENT_COLOR: 'accentColor',
 } as const;
 
 export const AUTH_CREDENTIALS = {
