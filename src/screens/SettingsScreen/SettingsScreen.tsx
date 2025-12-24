@@ -7,6 +7,7 @@ import { useThemeContext } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { SettingsStackParamList } from '../../types';
 import ThemeToggle from '../../components/common/ThemeToggle';
+import ColorToggle from '../../components/common/ColorToggle';
 import { Box, Text, Button } from '../../elements';
 import ScreenHeader from '../../components/common/ScreenHeader';
 import { STRINGS } from '../../utils/constants';
@@ -57,6 +58,9 @@ const SettingsScreen: React.FC = () => {
               Appearance
             </Text>
             <ThemeToggle />
+            <Box marginTop={12}>
+              <ColorToggle />
+            </Box>
           </Box>
 
           <Box
