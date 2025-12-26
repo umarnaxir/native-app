@@ -11,7 +11,7 @@ const CONTAINER_PADDING = 16;
 
 const HomeScreen: React.FC = () => {
   const { colors } = useThemeContext();
-  const { tasks, addTask, updateTask, deleteTask, toggleTaskCompleted, toggleTaskPinned } = useTasks();
+  const { tasks, addTask, updateTask, deleteTask, toggleTaskCompleted, toggleTaskPinned, showTemporaryTasks } = useTasks();
   const { title, setTitle, isSubmitting, handleSubmit } = useTaskForm(addTask);
 
   const totalTasks = tasks.length;
@@ -59,7 +59,7 @@ const HomeScreen: React.FC = () => {
         ListHeaderComponent={ListHeaderComponent}
         containerPadding={CONTAINER_PADDING}
         onRefresh={async () => {
-          // Refresh logic - tasks are already reactive
+          await showTemporaryTasks(5000);
         }}
       />
     </ScreenContainer>

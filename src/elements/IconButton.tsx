@@ -1,18 +1,21 @@
 import React from 'react';
 import { TouchableOpacity, TouchableOpacityProps, ViewStyle } from 'react-native';
+import * as Icons from 'lucide-react-native';
 import { useThemeContext } from '../context/ThemeContext';
 
 export type IconButtonProps = TouchableOpacityProps & {
-  icon: React.ReactNode;
+  icon: keyof typeof Icons | React.ReactNode;
   variant?: 'primary' | 'secondary' | 'ghost' | 'danger';
-  size?: 'small' | 'medium' | 'large';
+  size?: number | 'small' | 'medium' | 'large';
+  color?: string;
   circular?: boolean;
 };
 
 const IconButton: React.FC<IconButtonProps> = ({
   icon,
   variant = 'secondary',
-  size = 'medium',
+  size = 24,
+  color,
   circular = false,
   disabled,
   style,
@@ -20,10 +23,17 @@ const IconButton: React.FC<IconButtonProps> = ({
 }) => {
   const { colors } = useThemeContext();
 
+  const numericSize = typeof size === 'number'
+    ? size
+    : size === 'small'
+    ? 18
+    : size === 'large'
+    ? 28
+    : 24;
+
   const sizeStyles = {
-    small: { width: 32, height: 32 },
-    medium: { width: 40, height: 40 },
-    large: { width: 48, height: 48 },
+    width: numericSize * 1.5,
+    height: numericSize * 1.5,
   };
 
   const variantStyles: Record<string, ViewStyle> = {
@@ -47,8 +57,8 @@ const IconButton: React.FC<IconButtonProps> = ({
       disabled={disabled}
       style={[
         {
-          ...sizeStyles[size],
-          borderRadius: circular ? sizeStyles[size].width / 2 : 10,
+          ...sizeStyles,
+          borderRadius: circular ? sizeStyles.width / 2 : 10,
           alignItems: 'center',
           justifyContent: 'center',
           ...variantStyles[variant],
@@ -58,7 +68,19 @@ const IconButton: React.FC<IconButtonProps> = ({
       ]}
       {...props}
     >
-      {icon}
+      {/* Resolve icon node: accept React element or lucide icon name */}
+      {
+        (() => {
+          if (React.isValidElement(icon)) {
+            return icon;
+          }
+          if (typeof icon === 'string' && (Icons as any)[icon]) {
+            const IconComp = (Icons as any)[icon] as React.ComponentType<any>;
+            return <IconComp color={color || colors.text} size={numericSize} />;
+          }
+          return null;
+        })()
+      }
     </TouchableOpacity>
   );
 };
