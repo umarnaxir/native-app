@@ -17,16 +17,14 @@ const HomeScreen: React.FC = () => {
   const totalTasks = tasks.length;
   const completedTasks = tasks.filter((task) => task.completed).length;
   const pendingTasks = tasks.filter((task) => task.status === 'pending').length;
-  const overdueTasks = tasks.filter((task) => task.status === 'overdue').length;
 
   const stats = useMemo(
     () => [
       { label: 'Total', value: totalTasks, valueColor: 'text' as const },
       { label: 'Pending', value: pendingTasks, valueColor: 'text' as const },
-      { label: 'Overdue', value: overdueTasks, valueColor: 'danger' as const },
       { label: 'Completed', value: completedTasks, valueColor: 'success' as const },
     ],
-    [totalTasks, pendingTasks, overdueTasks, completedTasks]
+    [totalTasks, pendingTasks, completedTasks]
   );
 
   const ListHeaderComponent = useMemo(

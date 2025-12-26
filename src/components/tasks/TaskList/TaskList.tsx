@@ -46,6 +46,7 @@ const TaskList: React.FC<TaskListProps> = ({
       paddingHorizontal: containerPadding,
       paddingVertical: 0,
       paddingBottom: 32,
+      flexGrow: 1,
     }),
     [containerPadding]
   );
@@ -62,44 +63,42 @@ const TaskList: React.FC<TaskListProps> = ({
     );
   };
 
-  if (tasks.length === 0) {
-    return (
-      <Box flex={1}>
-        {ListHeaderComponent &&
-          (typeof ListHeaderComponent === 'function' ? (
-            <ListHeaderComponent />
-          ) : (
-            ListHeaderComponent
-          ))}
-        <Box paddingHorizontal={containerPadding} paddingVertical={24} alignItems="center" justifyContent="center">
-          <Text fontSize={14} color="mutedText">
-            {STRINGS.noTasks}
-          </Text>
-        </Box>
-      </Box>
-    );
-  }
-
   return (
-    <FlatList
-      data={tasks}
-      keyExtractor={(item) => item.id}
-      renderItem={renderItem}
-      ListHeaderComponent={ListHeaderComponent}
-      contentContainerStyle={contentContainerStyle}
-      showsVerticalScrollIndicator={false}
-      keyboardShouldPersistTaps="handled"
-      refreshControl={
-        onRefresh ? (
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={handleRefresh}
-            tintColor={colors.primary}
-            colors={[colors.primary]}
-          />
-        ) : undefined
-      }
-    />
+    <Box flex={1}>
+      {ListHeaderComponent &&
+        (typeof ListHeaderComponent === 'function' ? (
+          <ListHeaderComponent />
+        ) : (
+          ListHeaderComponent
+        ))}
+
+      <FlatList
+        data={tasks}
+        keyExtractor={(item) => item.id}
+        renderItem={renderItem}
+        contentContainerStyle={contentContainerStyle}
+        style={{ flex: 1 }}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        ListEmptyComponent={
+          <Box paddingHorizontal={containerPadding} paddingVertical={24} alignItems="center" justifyContent="center">
+            <Text fontSize={14} color="mutedText">
+              {STRINGS.noTasks}
+            </Text>
+          </Box>
+        }
+        refreshControl={
+          onRefresh ? (
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
+              tintColor={colors.primary}
+              colors={[colors.primary]}
+            />
+          ) : undefined
+        }
+      />
+    </Box>
   );
 };
 
