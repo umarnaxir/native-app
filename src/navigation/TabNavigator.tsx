@@ -1,6 +1,7 @@
 import React, {
   createContext,
   ReactNode,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -176,36 +177,38 @@ const TasksProvider: React.FC<TasksProviderProps> = ({ children }) => {
     return () => clearInterval(interval);
   }, [isHydrated]);
 
-  const addTask = (
-    title: string,
-    dueDate?: number,
-    priority?: TaskPriority,
-    pinned?: boolean,
-  ) => {
-    const trimmed = title.trim();
-    if (!trimmed) {
-      return;
-    }
-    const newTask: Task = {
-      id: Date.now().toString(),
-      title: trimmed,
-      completed: false,
-      createdAt: Date.now(),
-      dueDate,
-      status: dueDate && dueDate < Date.now() ? 'overdue' : 'pending',
-      priority: priority || undefined,
-      pinned: pinned || false,
-    };
-    setTasks(prev => {
-      const newTasks = [newTask, ...prev];
-      // Sort: pinned first, then by creation date (newest first)
-      return newTasks.sort((a, b) => {
-        if (a.pinned && !b.pinned) return -1;
-        if (!a.pinned && b.pinned) return 1;
-        return b.createdAt - a.createdAt;
+  const addTask = useCallback(
+    (
+      title: string,
+      dueDate?: number,
+      priority?: TaskPriority,
+      pinned?: boolean,
+    ) => {
+      const trimmed = title.trim();
+      if (!trimmed) {
+        return;
+      }
+      const newTask: Task = {
+        id: Date.now().toString(),
+        title: trimmed,
+        completed: false,
+        createdAt: Date.now(),
+        dueDate,
+        status: dueDate && dueDate < Date.now() ? 'overdue' : 'pending',
+        priority: priority || undefined,
+        pinned: pinned || false,
+      };
+      setTasks(prev => {
+        const newTasks = [newTask, ...prev];
+        return newTasks.sort((a, b) => {
+          if (a.pinned && !b.pinned) return -1;
+          if (!a.pinned && b.pinned) return 1;
+          return b.createdAt - a.createdAt;
+        });
       });
-    });
-  };
+    },
+    [],
+  );
 
   const updateTask = (
     id: string,

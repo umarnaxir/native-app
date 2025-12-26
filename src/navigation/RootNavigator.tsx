@@ -1,14 +1,12 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
-import AuthNavigator from './AuthNavigator';
+// import {  StyleSheet} from 'react-native';
 import { DrawerNavigator } from './DrawerNavigator';
-import { useAuth } from '../context/AuthContext';
 import { useThemeContext } from '../context/ThemeContext';
 
 const RootNavigator: React.FC = () => {
   // const { isLoggedIn, isAuthLoading } = useAuth();
-  const { navigationTheme, colors } = useThemeContext();
+  const { navigationTheme } = useThemeContext();
 
   // if (isAuthLoading) {
   //   return (
@@ -26,13 +24,13 @@ const RootNavigator: React.FC = () => {
   );
 };
 
-const styles = StyleSheet.create({
-  loadingContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+// const styles = StyleSheet.create({
+//   loadingContainer: {
+//     flex: 1,
+//     alignItems: 'center',
+//     justifyContent: 'center',
+//   },
+// });
 
 export default RootNavigator;
 
