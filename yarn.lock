@@ -7200,6 +7200,11 @@ react-native-is-edge-to-edge@1.2.1:
   resolved "https://registry.yarnpkg.com/react-native-is-edge-to-edge/-/react-native-is-edge-to-edge-1.2.1.tgz#64e10851abd9d176cbf2b40562f751622bde3358"
   integrity sha512-FLbPWl/MyYQWz+KwqOZsSyj2JmLKglHatd3xLZWskXOpRaio4LfEDEz8E/A6uD8QoTHW6Aobw1jbEwK7KMgR7Q==
 
+react-native-permissions@^5.4.4:
+  version "5.4.4"
+  resolved "https://registry.yarnpkg.com/react-native-permissions/-/react-native-permissions-5.4.4.tgz#8a63b001fc0f9e88426c36b21a6fe379c4533b04"
+  integrity sha512-WB5lRCBGXETfuaUhem2vgOceb9+URCeyfKpLGFSwoOffLuyJCA6+NTR3l1KLkrK4Ykxsig37z16/shUVufmt7A==
+
 react-native-reanimated@^4.2.1:
   version "4.2.1"
   resolved "https://registry.yarnpkg.com/react-native-reanimated/-/react-native-reanimated-4.2.1.tgz#fbdee721bff0946a6e5ae67c8c38c37ca4a0a057"
