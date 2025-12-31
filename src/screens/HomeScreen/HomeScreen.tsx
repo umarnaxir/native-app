@@ -11,22 +11,20 @@ const CONTAINER_PADDING = 16;
 
 const HomeScreen: React.FC = () => {
   const { colors } = useThemeContext();
-  const { tasks, addTask, updateTask, deleteTask, toggleTaskCompleted, toggleTaskPinned } = useTasks();
+  const { tasks, addTask, updateTask, deleteTask, toggleTaskCompleted, toggleTaskPinned, showTemporaryTasks } = useTasks();
   const { title, setTitle, isSubmitting, handleSubmit } = useTaskForm(addTask);
 
   const totalTasks = tasks.length;
   const completedTasks = tasks.filter((task) => task.completed).length;
   const pendingTasks = tasks.filter((task) => task.status === 'pending').length;
-  const overdueTasks = tasks.filter((task) => task.status === 'overdue').length;
 
   const stats = useMemo(
     () => [
       { label: 'Total', value: totalTasks, valueColor: 'text' as const },
       { label: 'Pending', value: pendingTasks, valueColor: 'text' as const },
-      { label: 'Overdue', value: overdueTasks, valueColor: 'danger' as const },
       { label: 'Completed', value: completedTasks, valueColor: 'success' as const },
     ],
-    [totalTasks, pendingTasks, overdueTasks, completedTasks]
+    [totalTasks, pendingTasks, completedTasks]
   );
 
   const ListHeaderComponent = useMemo(
@@ -59,7 +57,7 @@ const HomeScreen: React.FC = () => {
         ListHeaderComponent={ListHeaderComponent}
         containerPadding={CONTAINER_PADDING}
         onRefresh={async () => {
-          // Refresh logic - tasks are already reactive
+          await showTemporaryTasks(5000);
         }}
       />
     </ScreenContainer>

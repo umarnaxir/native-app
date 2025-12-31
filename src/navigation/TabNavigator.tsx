@@ -1,13 +1,20 @@
 import React, {
   createContext,
   ReactNode,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
   useState,
+  useRef,
 } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import {
+  useNavigation,
+  DrawerActions,
+} from '@react-navigation/native';
+import { IconButton } from '../elements';
 import {
   Home,
   List,
@@ -51,6 +58,7 @@ type TasksContextValue = {
   toggleTaskCompleted: (id: string) => void;
   toggleTaskPinned: (id: string) => void;
   updateTaskPriority: (id: string, priority: TaskPriority) => void;
+  showTemporaryTasks: (durationMs?: number) => Promise<void>;
 };
 
 const TasksContext = createContext<TasksContextValue | undefined>(undefined);
@@ -169,36 +177,38 @@ const TasksProvider: React.FC<TasksProviderProps> = ({ children }) => {
     return () => clearInterval(interval);
   }, [isHydrated]);
 
-  const addTask = (
-    title: string,
-    dueDate?: number,
-    priority?: TaskPriority,
-    pinned?: boolean,
-  ) => {
-    const trimmed = title.trim();
-    if (!trimmed) {
-      return;
-    }
-    const newTask: Task = {
-      id: Date.now().toString(),
-      title: trimmed,
-      completed: false,
-      createdAt: Date.now(),
-      dueDate,
-      status: dueDate && dueDate < Date.now() ? 'overdue' : 'pending',
-      priority: priority || undefined,
-      pinned: pinned || false,
-    };
-    setTasks(prev => {
-      const newTasks = [newTask, ...prev];
-      // Sort: pinned first, then by creation date (newest first)
-      return newTasks.sort((a, b) => {
-        if (a.pinned && !b.pinned) return -1;
-        if (!a.pinned && b.pinned) return 1;
-        return b.createdAt - a.createdAt;
+  const addTask = useCallback(
+    (
+      title: string,
+      dueDate?: number,
+      priority?: TaskPriority,
+      pinned?: boolean,
+    ) => {
+      const trimmed = title.trim();
+      if (!trimmed) {
+        return;
+      }
+      const newTask: Task = {
+        id: Date.now().toString(),
+        title: trimmed,
+        completed: false,
+        createdAt: Date.now(),
+        dueDate,
+        status: dueDate && dueDate < Date.now() ? 'overdue' : 'pending',
+        priority: priority || undefined,
+        pinned: pinned || false,
+      };
+      setTasks(prev => {
+        const newTasks = [newTask, ...prev];
+        return newTasks.sort((a, b) => {
+          if (a.pinned && !b.pinned) return -1;
+          if (!a.pinned && b.pinned) return 1;
+          return b.createdAt - a.createdAt;
+        });
       });
-    });
-  };
+    },
+    [],
+  );
 
   const updateTask = (
     id: string,
@@ -282,6 +292,52 @@ const TasksProvider: React.FC<TasksProviderProps> = ({ children }) => {
     });
   }, [tasks]);
 
+  const tempTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const showTemporaryTasks = async (durationMs = 5000) => {
+    try {
+      // If temp tasks are already present, just reset the timer and don't re-add them
+      const hasTemp = tasks.some(t => t.id.startsWith('temp-'));
+
+      if (tempTimerRef.current) {
+        clearTimeout(tempTimerRef.current);
+        tempTimerRef.current = null;
+      }
+
+      if (!hasTemp) {
+        const now = Date.now();
+        const temp1: Task = {
+          id: `temp-${now}-1`,
+          title: 'Task 5',
+          completed: false,
+          createdAt: now,
+          status: 'pending',
+          priority: undefined,
+          pinned: false,
+        };
+        const temp2: Task = {
+          id: `temp-${now}-2`,
+          title: 'Task 6',
+          completed: false,
+          createdAt: now + 1,
+          status: 'pending',
+          priority: undefined,
+          pinned: false,
+        };
+
+        setTasks(prev => [temp2, temp1, ...prev.filter(t => !t.id.startsWith('temp-'))]);
+      }
+
+      // Schedule removal after durationMs
+      tempTimerRef.current = setTimeout(() => {
+        setTasks(prev => prev.filter(t => !t.id.startsWith('temp-')));
+        tempTimerRef.current = null;
+      }, durationMs);
+    } catch (e) {
+      console.warn('showTemporaryTasks failed', e);
+    }
+  };
+
   const value = useMemo(
     () => ({
       tasks: sortedTasks,
@@ -291,6 +347,7 @@ const TasksProvider: React.FC<TasksProviderProps> = ({ children }) => {
       toggleTaskCompleted,
       toggleTaskPinned,
       updateTaskPriority,
+      showTemporaryTasks,
     }),
     [
       sortedTasks,
@@ -300,6 +357,7 @@ const TasksProvider: React.FC<TasksProviderProps> = ({ children }) => {
       toggleTaskCompleted,
       toggleTaskPinned,
       updateTaskPriority,
+      showTemporaryTasks,
     ],
   );
 
@@ -314,6 +372,7 @@ const TasksProvider: React.FC<TasksProviderProps> = ({ children }) => {
 
 const TabNavigator: React.FC = () => {
   const { colors } = useThemeContext();
+  const navigation = useNavigation();
 
   return (
     <TasksProvider>
@@ -333,6 +392,22 @@ const TabNavigator: React.FC = () => {
             name="Home"
             component={HomeScreen}
             options={{
+              headerShown: true,
+              headerStyle: {
+                backgroundColor: colors.background,
+              },
+              headerTintColor: colors.text,
+              headerTitle: '',
+              headerLeft: () => (
+                <IconButton
+                  icon="menu"
+                  variant="ghost"
+                  onPress={() => navigation.dispatch(DrawerActions.toggleDrawer())}
+                  color={colors.text}
+                  size={24}
+                  style={{ width: 24, height: 24, padding: 0, marginLeft: 15 }}
+                />
+              ),
               tabBarIcon: ({ color, size }) => (
                 <Home color={color} size={size} />
               ),

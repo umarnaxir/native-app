@@ -3,12 +3,16 @@ import { View, Text, FlatList, Image, ActivityIndicator, StyleSheet, Pressable, 
 import { useFetchLoggedInUser, useFetchHomepageMarketplaceListingV2 } from '../../hooks';
 import { IMAGE_BASE_URL } from '../../utils/constants';
 import { useThemeContext } from '../../context/ThemeContext';
+import ScreenHeader from '../../components/common/ScreenHeader';
+import { useNavigation } from '@react-navigation/native';
+import { DrawerActions } from '@react-navigation/native';
+import { IconButton } from '../../elements';
 
 const RumieScreen = () => {
   const { user, loading: userLoading, error: userError, refetch: refetchUser } = useFetchLoggedInUser();
   const eduInstituteId = user?.eduInstituteId ?? null;
   const { listings, loading: listingsLoading, error: listingsError, refetch: refetchListings } = useFetchHomepageMarketplaceListingV2(eduInstituteId);
-
+  const navigation = useNavigation();
   const { colors } = useThemeContext();
   
   const initialLoading = userLoading || (listingsLoading && listings.length === 0);
@@ -39,13 +43,20 @@ const RumieScreen = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }] }>
-      <Text style={[styles.pageTitle, { color: colors.text }]}>Rumie Market Place</Text>
-
-      {user ? (
-        <Text style={[styles.header, { color: colors.text }]}>Welcome, {user.firstName}</Text>
-      ) : (
-        <Text style={[styles.header, { color: colors.text }]}>Rumie Screen</Text>
-      )}
+      <ScreenHeader
+        title="Rumie Market Place"
+        subtitle={user ? `Welcome, ${user.firstName}`: 'Rumie Screen'}
+        leftIcon={
+          <IconButton
+            icon="menu"
+            variant="ghost"
+            onPress={() => navigation.dispatch(DrawerActions.toggleDrawer())}
+            color={colors.text}
+            size={24}
+            style={{ width: 24, height: 24, padding: 0 }}
+          />
+        }
+      />
       <FlatList
         data={listings}
         keyExtractor={(item) => item.id}

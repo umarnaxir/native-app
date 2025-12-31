@@ -8,9 +8,10 @@ import { useAuth } from '../../context/AuthContext';
 import { SettingsStackParamList } from '../../types';
 import ThemeToggle from '../../components/common/ThemeToggle';
 import ColorToggle from '../../components/common/ColorToggle';
-import { Box, Text, Button } from '../../elements';
+import { Box, Text, Button, IconButton } from '../../elements';
 import ScreenHeader from '../../components/common/ScreenHeader';
 import { STRINGS } from '../../utils/constants';
+import { DrawerActions } from '@react-navigation/native';
 
 type SettingsScreenNavigationProp = NativeStackNavigationProp<SettingsStackParamList, 'SettingsMain'>;
 
@@ -43,6 +44,16 @@ const SettingsScreen: React.FC = () => {
         <ScreenHeader
           title={STRINGS.settingsTitle}
           subtitle="Personalize your experience and manage your account."
+          leftIcon={
+            <IconButton
+              icon="menu"
+              variant="ghost"
+              onPress={() => navigation.dispatch(DrawerActions.toggleDrawer())}
+              color={colors.text}
+              size={24}
+              style={{ width: 24, height: 24, padding: 0 }}
+            />
+          }
         />
 
         <Box marginHorizontal={20} marginTop={16}>
@@ -110,4 +121,5 @@ const SettingsScreen: React.FC = () => {
 };
 
 export default SettingsScreen;
+
 

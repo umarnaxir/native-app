@@ -5,6 +5,7 @@ export const STORAGE_KEYS = {
   IS_DARK_MODE: 'isDarkMode',
   TASKS: 'tasks',
   ACCENT_COLOR: 'accentColor',
+  DEMO_TASKS_SEEDED: 'demoTasksSeeded',
 } as const;
 
 export const AUTH_CREDENTIALS = {
