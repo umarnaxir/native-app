@@ -13,10 +13,10 @@ export const DrawerNavigator = () => {
   return (
     <Drawer.Navigator drawerContent={(props) => <DrawerContent {...props} />}>
       <Drawer.Screen name="Home" component={TabNavigator} />
-      <Drawer.Screen name="File Upload" component={FileUploadScreen} />
-      {/* <Drawer.Screen name="Open Modal" component={ModalScreen} /> */}
-      {/* <Drawer.Screen name="Permission" component={PermissionsScreen} /> */}
       <Drawer.Screen name="OTP" component={OTPScreen} />
+      <Drawer.Screen name="Upload File" component={FileUploadScreen} />
+      <Drawer.Screen name="Open Modal" component={ModalScreen} />
+      {/* <Drawer.Screen name="Permission" component={PermissionsScreen} /> */}
     </Drawer.Navigator>
   );
 };
