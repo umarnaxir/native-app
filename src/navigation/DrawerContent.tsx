@@ -11,7 +11,7 @@ export const DrawerContent = (props: any) => {
   return (
     <DrawerContentScrollView {...props}>
       <DrawerItemList {...props} />
-      <DrawerItem label="Logout" onPress={() => logout()} />
+      {/* <DrawerItem label="Logout" onPress={() => logout()} /> */}
     </DrawerContentScrollView>
   );
 };
